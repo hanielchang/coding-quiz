@@ -1,4 +1,5 @@
 .box {
+    margin: 0 auto;
     border-color: black;  
     border-width: 2px;  
     border-style: inset;
@@ -34,3 +35,18 @@
   .box span {
     float: right;
   }
+
+  /* .box label {
+    display:inline-flex
+  } */
+
+  .flex-row {
+    display: flex;
+    margin-left: 400px;
+    margin-right: 400px;
+  }
+
+  .flex-row label {
+    margin-right: 10px;
+  }
+  

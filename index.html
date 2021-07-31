@@ -15,18 +15,20 @@
             <div>
                 <a href="./highscores.html">View high scores</a>
                 <span>
-                    Timer
+                    <div>Time left = <span id="timer"></span></div>
                 </span>
             </div>
-            <h1 class="title">Coding Challenge Quiz</h1>
-            <p>Try to answer the following code-related questions within the time-limit. <br>
-                Keep in mind that incorrect answers will penalize your score/time<br>
-                by ten seconds!
-            </p>
-            <button type="button">Start Quiz</button>
+            <div id="quiz-box">
+                <h1 class="title">Coding Challenge Quiz</h1>
+                <p>Try to answer the following code-related questions within the time-limit. <br>
+                    Keep in mind that incorrect answers will penalize your score/time<br>
+                    by ten seconds!
+                </p>
+                <button type="button" id="start" class="start">Start Quiz</button>
+            </div>
         </section>
     </main>
-
+    <script src="./assets/js/script.js"></script>
 </body>
 
 </html>
