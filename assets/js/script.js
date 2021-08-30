@@ -1,9 +1,12 @@
 var startQuiz = document.querySelector("#start");
-var mainDisplay = document.querySelector("#quiz-box");
+var quizBox = document.querySelector("#quiz-box");
+var mainDisplay = document.querySelector('#main-display');
+var indicator = document.querySelector("#indicator");
 var curObj = 0;
 var timerOn = false;
 var timer;
 var presentTime = 75;
+var scores = [];
 
 var questionsAry = [
     {
@@ -51,9 +54,9 @@ var questionsAry = [
 
 document.getElementById('timer').innerHTML = presentTime;
 
+
 function startTimer() {
     presentTime = document.getElementById('timer').innerHTML;
-    console.log(presentTime);
 
     presentTime -= 1;
     if (presentTime < 0) {
@@ -80,6 +83,12 @@ function displayQuestion() {
         var questionText = document.createElement("p");
         questionText.textContent = questionsAry[curObj].q1;
 
+        // Initialize the indicator header (that says "correct" or "wrong answer") to blank
+        indicator.textContent = '';
+        if (curObj > 0) {
+            indicator.textContent = 'Correct!';
+        }
+
         // Store answers of current object from questionsAry into respective variables
         var ans1 = questionsAry[curObj].a0;
         var ans2 = questionsAry[curObj].a1;
@@ -87,16 +96,17 @@ function displayQuestion() {
         var ans4 = questionsAry[curObj].a3;
         var answersAry = [ans1, ans2, ans3, ans4];
 
-        // Initiate mainDisplay to blank, and then append question text
-        mainDisplay.innerHTML = "";
-        mainDisplay.appendChild(questionText);
+        // Initiate quizBox to blank, and then append question text
+        quizBox.innerHTML = "";
+        quizBox.appendChild(questionText);
 
         // Create button elements and append them with the proper text content from answersAry
         for (let index = 0; index < answersAry.length; index++) {
             var Button = document.createElement("button");
             Button.textContent = answersAry[index]
             Button.className = "a" + index;
-            mainDisplay.appendChild(Button);
+            Button.id = "answer";
+            quizBox.appendChild(Button);
 
         }
     }
@@ -107,60 +117,111 @@ function displayQuestion() {
 }
 
 var checkAnswer = function (event) {
-    var userInput = event.target;
-    var correctAnswer = questionsAry[curObj].CA;
-
-    if (userInput.className !== 'start' && presentTime > 0) {
-        if (userInput.matches(correctAnswer)) {
-            // writeMessage();
-            curObj++;
-            displayQuestion();
-        }
-        else {
-            console.log("wrong answer!")
-            presentTime = presentTime - 10;
-            if (presentTime <= 0) {
-                presentTime = 0;
-                quizOver();
+    if (event.target.id === "answer") {
+        var userInput = event.target;
+        var correctAnswer = questionsAry[curObj].CA;
+        if (userInput.className !== 'start' && presentTime > 0) {
+            if (userInput.matches(correctAnswer)) {
+                // writeMessage();
+                curObj++;
+                displayQuestion();
             }
-            document.getElementById('timer').innerHTML = presentTime;
+            else {
+                console.log("wrong answer!")
+                indicator.textContent = 'wrong answer!';
+                presentTime = presentTime - 10;
+                if (presentTime <= 0) {
+                    presentTime = 0;
+                    quizOver();
+                }
+                document.getElementById('timer').innerHTML = presentTime;
+            }
         }
     }
 };
 
 function quizOver() {
-    mainDisplay.innerHTML = "";
+    quizBox.innerHTML = "";
     var done = document.createElement("h1");
-    var score = document.createElement("p");
+    var scoreText = document.createElement("p");
     var inputBox = document.createElement("input");
     var label = document.createElement("label");
     var submitBtn = document.createElement("button");
     var divBox = document.createElement("div");
-    
+
+
+
     label.textContent = "Enter initials"
     done.textContent = "All done!";
-    score.textContent = "Your final score is " + presentTime;
+    scoreText.textContent = "Your final score is " + presentTime;
     submitBtn.type = "submit";
+    submitBtn.id = "submit";
     submitBtn.textContent = "Submit";
+    inputBox.id = 'text-box';
     divBox.className = "flex-row";
-    
-    mainDisplay.appendChild(done);
-    mainDisplay.appendChild(score);
+
+    // Enable the submit button to link directly to the high score page after being clicked
+    var linkButton = document.createElement('a');
+    linkButton.href = "./highscores.html"
+    linkButton.appendChild(submitBtn);
+
+    // Append all elements
+    quizBox.appendChild(done);
+    quizBox.appendChild(scoreText);
     divBox.appendChild(label);
     divBox.appendChild(inputBox);
-    divBox.appendChild(submitBtn);
-    mainDisplay.appendChild(divBox);
+    divBox.appendChild(linkButton);
+    quizBox.appendChild(divBox);
 
+    // scoreItem = createScoreItem();
+    // scores.push(scoreItem);
 }
 
-// function writeMessage() {
-//     console.log("Entered writeMessage");
-//     var message = document.createElement("button");
-//     console.log(message)
-//     message.textContent = "Correct!";
-//     mainDisplay.appendChild(message);
+var saveScores = function () {
+    localStorage.setItem("scores", JSON.stringify(scores));
+}
+
+var loadScores = function () {
+    var loadedScores = localStorage.getItem("scores");
+
+    if (!loadedScores) {
+        return false;
+    }
+
+    scores = JSON.parse(loadedScores);
+}
+
+function createScoreItem(event) {
+    if (event.target.id === "submit") {
+        var initials = document.getElementById("text-box").value;
+        if (scores.length === 0) {
+            var scoreString = '1. ' + initials + ' - ' + presentTime;
+            scores.push(scoreString);
+            saveScores();
+            return;
+        }
+
+        var position = scores.length + 1;
+        var scoreString = position + '. ' + initials + ' - ' + presentTime;
+        scores.push(scoreString);
+        saveScores();
+        return;
+    }
+};
+
+// function showScores(event) {
+// if (event.target.id === "submit") {
+// localStorage.setItem("value", presentTime);
 // }
+//     var scoreItem = document.createElement("li");
+//     scoreItem.textContent = '1. ' + 'HC - ' + presentTime;
+//     scoreList.appendChild(scoreItem);
+// localStorage.setItem('scoreItem', scoreItem);
+// };
+
 
 // Event listeners
+loadScores();
 startQuiz.addEventListener("click", displayQuestion);
-mainDisplay.addEventListener("click", checkAnswer);
+quizBox.addEventListener("click", checkAnswer);
+mainDisplay.addEventListener("click", createScoreItem);
